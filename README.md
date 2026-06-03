@@ -1,21 +1,22 @@
 # COVID-19 Mortality Prediction
 
 <p align="center">
-  <img src="figures/results_summary.png" alt="Validation and test results summary" width="920"/>
+  <img src="figures/results_summary.png" alt="Project results summary" width="920"/>
 </p>
 
 <p align="center">
-  <strong>End-to-end ML classification</strong> on ~1M Mexican COVID-19 patient records · Logistic Regression, Random Forest, KNN
+  <strong>End-to-end ML classification</strong> · ~1M patients · Logistic Regression · Random Forest · KNN
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
   <img src="https://img.shields.io/badge/scikit--learn-ML-F7931E?style=flat" alt="sklearn"/>
   <img src="https://img.shields.io/badge/Jupyter-Notebooks-F37626?style=flat&logo=jupyter&logoColor=white" alt="Jupyter"/>
-  <img src="https://img.shields.io/badge/Status-Educational%20only-95a5a6?style=flat" alt="Educational"/>
+  <img src="https://img.shields.io/badge/Test%20ROC--AUC-0.954-2ecc71?style=flat" alt="ROC-AUC"/>
+  <img src="https://img.shields.io/badge/Test%20Recall-0.895-e74c3c?style=flat" alt="Recall"/>
 </p>
 
-> **Disclaimer:** Educational project only — not for clinical decision-making or medical diagnosis.
+> **Disclaimer:** Educational project only — not for clinical use.
 
 ---
 
@@ -23,75 +24,69 @@
 
 | | |
 |:--|:--|
-| **Selected model** | Logistic Regression (threshold **0.6**) |
+| **Winner** | Logistic Regression @ threshold **0.6** |
 | **Test ROC-AUC** | **0.954** |
-| **Test recall** | **0.895** (catches ~90% of deaths on held-out test set) |
-| **Dataset** | ~1M rows → ~1.02M after cleaning · **7.3%** death rate |
+| **Test recall** | **0.895** |
+| **Data** | ~1M rows · **7.3%** deaths |
 
 ---
 
-## Pipeline at a glance
+## Pipeline
 
 <p align="center">
-  <img src="figures/pipeline.png" alt="Project pipeline from raw data to final model" width="800"/>
+  <img src="figures/pipeline.png" alt="ML pipeline" width="820"/>
 </p>
-
-```mermaid
-flowchart LR
-  A["Covid_Data.csv"] --> B["cleaning.ipynb"]
-  B --> C["modeling.ipynb"]
-  C --> D["Logistic Regression"]
-  C --> E["Random Forest"]
-  C --> F["KNN"]
-  D --> G["Pick best ROC-AUC"]
-  E --> G
-  F --> G
-  G --> H["Threshold tune"]
-  H --> I["One-time test eval"]
-```
 
 ---
 
-## Data exploration
+## Data at a glance
 
 <p align="center">
-  <img src="figures/eda_overview.png" alt="Class distribution, death rate by age, feature correlations" width="920"/>
+  <img src="figures/eda_overview.png" alt="EDA: class balance, age, correlations" width="920"/>
 </p>
-
-**Target:** `DEATH` (0 = survived, 1 = died) · **Imbalanced** (~7% deaths)
-
-| Feature | Description |
-|---------|-------------|
-| AGE | Patient age |
-| PNEUMONIA, DIABETES, HIPERTENSION, OBESITY, … | Comorbidities (binary) |
-| TREATMENT_TYPE | Outpatient vs hospitalized |
-| **DEATH** | **Label** |
-
-<details>
-<summary><strong>Preprocessing steps</strong> (click to expand)</summary>
-
-1. Rename columns · create `DEATH` from `DATE_DIED`
-2. Encode 1/2 → 1/0 · drop high-missing columns (>40%)
-3. Drop rows with NaN · stratified **60 / 20 / 20** train / val / test
-4. `StandardScaler` on train only (LR & KNN) · `class_weight='balanced'` (LR & RF)
-
-</details>
 
 ---
 
-## Model comparison (validation)
+## Model evaluation gallery
+
+<p align="center"><strong>Compare three models on the validation set</strong></p>
+
+<table>
+<tr>
+<td width="50%" align="center">
+  <img src="figures/model_comparison.png" width="100%"/><br/>
+  <sub>All metrics side-by-side</sub>
+</td>
+<td width="50%" align="center">
+  <img src="figures/roc_curves.png" width="100%"/><br/>
+  <sub>ROC curves</sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+  <img src="figures/confusion_matrices.png" width="100%"/><br/>
+  <sub>Confusion matrices</sub>
+</td>
+<td align="center">
+  <img src="figures/model_radar.png" width="100%"/><br/>
+  <sub>Recall · F1 · ROC-AUC radar</sub>
+</td>
+</tr>
+</table>
+
+### Per-model snapshots
 
 <p align="center">
-  <img src="figures/model_comparison.png" alt="Bar chart comparing validation metrics across three models" width="900"/>
+  <img src="figures/model_logistic_regression.png" width="32%" alt="Logistic Regression"/>
+  <img src="figures/model_random_forest.png" width="32%" alt="Random Forest"/>
+  <img src="figures/model_knn.png" width="32%" alt="KNN"/>
 </p>
 
-| Model | Recall | F1 | ROC-AUC | Notes |
-|-------|--------|-----|---------|--------|
-| **Logistic Regression** | **0.921** | **0.557** | **0.953** | Selected — best ranking & recall |
-| Random Forest | 0.785 | 0.542 | 0.935 | Strong accuracy, lower recall |
-| KNN | 0.442 | 0.486 | 0.897 | High precision, misses more deaths |
-
-**Why recall matters:** In risk screening, missing a true death (false negative) is worse than a false alarm.
+| Model | Recall | F1 | ROC-AUC | Verdict |
+|-------|--------|-----|---------|---------|
+| **Logistic Regression** | **0.921** | **0.557** | **0.953** | **Selected** |
+| Random Forest | 0.785 | 0.542 | 0.935 | Strong, lower recall |
+| KNN | 0.442 | 0.486 | 0.897 | High precision, misses deaths |
 
 ---
 
@@ -105,63 +100,61 @@ flowchart LR
 | F1-Score | 0.569 |
 | **ROC-AUC** | **0.954** |
 
-Cross-validation F1 (5-fold): LR **0.557** ±0.002 · RF **0.545** ±0.002 · KNN **0.486** ±0.002
-
 ---
 
-## Notebooks & more charts
+## Notebooks (full interactive story)
 
-| Notebook | What you get |
+| Notebook | Visuals inside |
 |----------|----------------|
-| [`cleaning.ipynb`](cleaning.ipynb) | EDA, missing data, cleaning |
-| [`modeling.ipynb`](modeling.ipynb) | Per-model plots, confusion matrices, **ROC curves**, **radar chart**, threshold tuning, feature importance |
+| [`cleaning.ipynb`](cleaning.ipynb) | Distributions, missing data, cleaning steps |
+| [`modeling.ipynb`](modeling.ipynb) | **All plots above +** threshold tuning, CV, feature importance, test dashboard |
 
-Run **`modeling.ipynb` → Run All** to regenerate all interactive figures.
+Open **`modeling.ipynb` on GitHub** — charts are embedded so you can scroll without running code.
 
-Regenerate README images only (fast, no training):
+To regenerate everything locally:
 
 ```bash
-python generate_figures.py
+pip install -r requirements.txt
+python build_visuals.py          # README figures + embed notebook images
+jupyter notebook modeling.ipynb  # optional: Run All for live numbers
 ```
 
 ---
 
-## Project structure
+## Project layout
 
 ```
 ds project/
+├── figures/           # PNG gallery (README + notebook preview)
 ├── cleaning.ipynb
 ├── modeling.ipynb
-├── figures/              ← README charts (PNG)
-├── generate_figures.py   ← rebuild figures/
+├── build_visuals.py   # one command → all figures + notebook embed
+├── generate_figures.py
 ├── data/Covid_Data.csv
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
 ---
 
-## How to run
+## Quick start
 
 ```bash
 git clone <repository-url>
 cd ds-project
 pip install -r requirements.txt
-jupyter notebook cleaning.ipynb   # then modeling.ipynb
+jupyter notebook cleaning.ipynb
+jupyter notebook modeling.ipynb
 ```
-
-**Requirements:** Python 3.8+
 
 ---
 
 ## Limitations
 
-- **Not for clinical use** — no regulatory validation
-- No hyperparameter tuning (baseline configs); future work: GridSearchCV / RandomizedSearchCV
-- Dropped ICU / INTUBED / PREGNANT (>40% missing) may hold useful signal
+- Not for clinical use · no hyperparameter tuning (GridSearchCV possible future work)
+- ICU / INTUBED / PREGNANT dropped (>40% missing)
 
 ---
 
-## Tech stack
+## Stack
 
 Python · Pandas · NumPy · scikit-learn · Matplotlib · Seaborn · Jupyter
