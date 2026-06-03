@@ -98,6 +98,24 @@ The model with the highest validation ROC-AUC is selected. The best threshold (b
 
 ---
 
+## Visualizations
+
+### Dataset overview
+
+![Target distribution, death rate by age, and feature correlations](figures/eda_overview.png)
+
+### Model comparison (validation set)
+
+![Validation metrics for Logistic Regression, Random Forest, and KNN](figures/model_comparison.png)
+
+### Final results summary
+
+![Validation metrics, test-set scores, and selected model](figures/results_summary.png)
+
+Additional plots (ROC curves, confusion matrices, threshold tuning, feature importance) are in `modeling.ipynb`.
+
+---
+
 ## Results
 
 ### Validation Set — Model Comparison
@@ -152,11 +170,13 @@ The model with the highest validation ROC-AUC is selected. The best threshold (b
 ```
 ds project/
 ├── cleaning.ipynb      # Data cleaning and exploratory data analysis
-├── modeling.ipynb       # ML pipeline: training, evaluation, and model selection
+├── modeling.ipynb      # ML pipeline: training, evaluation, and model selection
+├── figures/            # Static plots for README preview
 ├── data/
-│   └── Covid_Data.csv   # Raw COVID-19 dataset
-├── requirements.txt     # Python dependencies
-└── README.md            # Project documentation
+│   └── Covid_Data.csv  # Raw COVID-19 dataset
+├── generate_figures.py # Regenerate figures/ PNGs
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
 ```
 
 ---
