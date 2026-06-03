@@ -112,7 +112,7 @@ The model with the highest validation ROC-AUC is selected. The best threshold (b
 
 ![Validation metrics, test-set scores, and selected model](figures/results_summary.png)
 
-Additional plots (ROC curves, confusion matrices, threshold tuning, feature importance) are in `modeling.ipynb`.
+`modeling.ipynb` includes **per-model explanations**, validation metric charts, confusion matrices, ROC curves, a radar comparison, cross-validation, threshold tuning, and a final results dashboard. Run the notebook (or **Run All**) to render all figures.
 
 ---
 

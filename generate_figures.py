@@ -149,7 +149,7 @@ def fig_results_summary():
     )
     ax2.set_title("Final Selection", fontweight="bold")
     plt.suptitle("COVID-19 Mortality Prediction — Results Summary", fontsize=15, fontweight="bold", y=1.02)
-    plt.tight_layout()
+    fig.subplots_adjust(top=0.88)
     out = FIG_DIR / "results_summary.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
