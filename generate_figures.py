@@ -156,8 +156,39 @@ def fig_results_summary():
     print("Wrote", out)
 
 
+def fig_pipeline():
+    """Simple workflow diagram for README."""
+    fig, ax = plt.subplots(figsize=(12, 3.2))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 3)
+    ax.axis("off")
+
+    steps = [
+        (0.3, "Raw data\nCovid_Data.csv", "#3498db"),
+        (2.4, "Clean & EDA\ncleaning.ipynb", "#5dade2"),
+        (4.8, "Train & compare\nmodeling.ipynb", "#48c9b0"),
+        (7.5, "3 models\nLR · RF · KNN", "#9b59b6"),
+        (10.0, "Final pick\nLR @ 0.6", "#2ecc71"),
+    ]
+    for i, (x, label, color) in enumerate(steps):
+        box = plt.Rectangle((x, 0.9), 1.7, 1.2, facecolor=color, edgecolor="white", lw=2, alpha=0.9)
+        ax.add_patch(box)
+        ax.text(x + 0.85, 1.5, label, ha="center", va="center", fontsize=9, color="white", fontweight="bold")
+        if i < len(steps) - 1:
+            ax.annotate("", xy=(x + 2.0, 1.5), xytext=(x + 1.75, 1.5),
+                        arrowprops=dict(arrowstyle="->", color="#7f8c8d", lw=2))
+
+    ax.text(6, 2.65, "COVID-19 Mortality Prediction — ML Pipeline", ha="center",
+            fontsize=14, fontweight="bold", color="#2c3e50")
+    out = FIG_DIR / "pipeline.png"
+    fig.savefig(out, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print("Wrote", out)
+
+
 if __name__ == "__main__":
     df = load_cleaned_df()
+    fig_pipeline()
     fig_eda(df)
     fig_model_comparison()
     fig_results_summary()
