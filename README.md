@@ -41,7 +41,7 @@ The dataset is **imbalanced**: approximately 7% of patients died.
 2. **Target creation** — derived binary `DEATH` column from `DATE_DIED`
 3. **Value encoding** — converted raw encoding (1=yes, 2=no, 97/98/99=unknown) to standard binary (1/0/NaN)
 4. **Missing value handling** — dropped columns with >40% missing data; removed remaining rows with NaN
-5. **Feature scaling** — applied StandardScaler for Logistic Regression (fit on training data only to prevent leakage)
+5. **Feature scaling** — applied StandardScaler for Logistic Regression and KNN (fit on training data only to prevent leakage)
 6. **Class imbalance** — used `class_weight='balanced'` to give more weight to the minority class (deaths)
 
 ---
@@ -64,9 +64,9 @@ All splits use stratification to preserve the ~7% death rate in each set.
 |-------|-------------|
 | **Logistic Regression** | Simple, interpretable linear baseline with balanced class weights |
 | **Random Forest** | Ensemble of 200 decision trees with balanced class weights |
-| **HistGradientBoosting** | Modern gradient boosting from scikit-learn with balanced class weights |
+| **K-Nearest Neighbors (KNN)** | A distance-based model that predicts based on the most similar training examples |
 
-Logistic Regression, Random Forest, and HistGradientBoosting are configured with balanced class weights when supported by the installed scikit-learn version.
+Compared Logistic Regression, Random Forest, and K-Nearest Neighbors using precision, recall, F1-score, ROC-AUC, and cross-validation.
 
 ---
 
@@ -86,7 +86,7 @@ Since this is a **medical-risk classification** problem, we focus on **recall** 
 
 ### Cross-Validation
 
-All models were validated using **5-fold StratifiedKFold cross-validation** on the training set. For Logistic Regression, a **sklearn Pipeline** wraps StandardScaler + the model to prevent data leakage between folds.
+All models were validated using **5-fold StratifiedKFold cross-validation** on the training set. For Logistic Regression and KNN, a **sklearn Pipeline** wraps StandardScaler + the model to prevent data leakage between folds. KNN cross-validation runs on a stratified subsample (max 50,000 rows) because KNN is computationally expensive on large datasets.
 
 ### Threshold Tuning
 
@@ -106,46 +106,42 @@ The model with the highest validation ROC-AUC is selected. The best threshold (b
 |-------|----------|-----------|--------|----------|---------|
 | Logistic Regression | 0.8931 | 0.3988 | 0.9207 | 0.5566 | 0.9531 |
 | Random Forest | 0.9034 | 0.4140 | 0.7846 | 0.5420 | 0.9345 |
-| **HistGradientBoosting** | 0.8835 | 0.3804 | **0.9520** | 0.5435 | **0.9599** |
+| KNN | 0.9319 | 0.5404 | 0.4418 | 0.4861 | 0.8974 |
 
-### Cross-Validation (5-Fold, F1-Score)
+### Cross-Validation (5-Fold Stratified)
 
 | Model | Mean F1 | Std |
 |-------|---------|-----|
-| Logistic Regression | 0.5573 | 0.0021 |
-| Random Forest | 0.5448 | 0.0018 |
-| HistGradientBoosting | 0.5461 | 0.0006 |
+| Logistic Regression | 0.5573 | ±0.0021 |
+| Random Forest | 0.5448 | ±0.0018 |
+| KNN | 0.4858 | ±0.0018 |
 
-### Selected Model — Final Test Results
+### Final Test Set Results
 
-| | |
-|---|---|
-| **Model** | HistGradientBoosting |
-| **Threshold** | 0.6 |
-| **Reason** | Highest validation ROC-AUC (0.9599); threshold chosen by best validation F1-Score |
-
-| Metric | Test Score |
-|--------|-----------|
-| Accuracy | 0.8945 |
-| Precision | 0.4035 |
-| **Recall** | **0.9371** |
-| **F1-Score** | **0.5641** |
-| ROC-AUC | 0.9602 |
+| Metric | Value |
+|--------|-------|
+| Selected Model | Logistic Regression |
+| Selected Threshold | 0.6 |
+| Accuracy | 0.9011 |
+| Precision | 0.4168 |
+| Recall | 0.8952 |
+| F1-Score | 0.5688 |
+| ROC-AUC | 0.9539 |
 
 ### Key Takeaways
 
-- HistGradientBoosting achieved **93.7% recall** on the test set — it correctly identified the vast majority of death cases
 - Cross-validation confirms stable performance across all folds (very low std)
 - Top predictive features include age, pneumonia, treatment type, and diabetes
 - Test results closely match validation results, confirming the model generalizes well
+- Logistic Regression was selected for its highest ROC-AUC and recall on validation
 
 ---
 
 ## Limitations
 
-- This is an **educational project** — the models are not validated for clinical use
+- **This is an educational ML project and not intended for clinical use**
 - Some columns with high missing rates (ICU, INTUBED, PREGNANT) were dropped and could carry useful signal
-- No hyperparameter tuning was performed — default/simple configurations were used
+- No hyperparameter tuning was performed; simple baseline configurations were used. Future work could include GridSearchCV or RandomizedSearchCV.
 - The dataset may contain biases from the original data collection process
 - Real medical prediction systems require clinical validation, regulatory approval, and domain expert involvement
 
@@ -198,6 +194,6 @@ ds project/
 
 ## Future Improvements
 
-- Hyperparameter tuning with GridSearchCV
+- Hyperparameter tuning with GridSearchCV or RandomizedSearchCV
 - Calibration curves to assess probability reliability
 - Fairness analysis across demographic groups
